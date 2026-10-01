@@ -65,7 +65,9 @@ while brunning:
             if event.key == pygame.K_RIGHT:
                 playerX_change = 4
             if event.key == pygame.K_SPACE:
-                fire_bullet(playerX,bulletY)    
+                if bullet_state == "ready":
+                  bulletX = playerX
+                  fire_bullet(bulletX,bulletY)    
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 playerX_change = 0
@@ -92,8 +94,12 @@ while brunning:
        playerX = (800 - playerWidth)
 
     #BULLET
+    if bulletY <= 0:
+        bullet_state = "ready"
+        bulletY = 480
+        
     if bullet_state == "fire":
-       fire_bullet(playerX,bulletY)
+       fire_bullet(bulletX,bulletY)
        bulletY -= bulletY_change
 
     player(playerX,playerY)
