@@ -5,6 +5,13 @@ import time
 from pygame import mixer
 
 pygame.init()
+pygame.joystick.init()
+if pygame.joystick.get_count() == 0:
+   print("No controller detected. Please connect one and restart.")
+   pygame.quit()
+
+joystick = pygame.joystick.Joystick(0)
+joystick.init()
 
 #SCREEN WINDOW SETUP
 screen = pygame.display.set_mode((800,600))
@@ -106,16 +113,56 @@ while brunning:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             brunning = False
+
+        #PLAYER JOYSTICK EVENTS START
+        DEADZONE = 0.2
+        if event.type == pygame.JOYAXISMOTION:
+            if event.axis == 0: #LEFT AXIS
+               if event.value < -DEADZONE:
+                playerX_change = -4
+               elif event.value > DEADZONE:
+                playerX_change = 4
+               else:
+                playerX_change = 0
+            
+            
+        if event.type == pygame.JOYBUTTONDOWN:
+            if event.button == 7 and game_over == True:
+               game_over = False
+               score_value = 0
+               for i in range(num_of_enemies):
+                  enemyX[i] = random.randint(0,800-enemyWidth[i])
+                  enemyY[i] = random.randint(50,150)
+                  
+               
+            if bullet_state == "ready" and event.button == 0:
+               bullet_Sound = mixer.Sound("laser.wav")
+               bullet_Sound.play()
+               bulletX = playerX
+               fire_bullet(bulletX,bulletY)  
+               
+        if event.type == pygame.JOYBUTTONUP:
+            pass
+        if event.type == pygame.JOYHATMOTION:
+            if event.value == (-1,0):
+               playerX_change = -4
+            if event.value == (1,0):
+               playerX_change = 4
+            if event.value == (0,0):
+               playerX_change = 0   
+        #PLAYER JOYSTICK EVENTS END    
+
         #PLAYER KEYBOARD EVENTS    
         if event.type == pygame.KEYDOWN:
 
-            if event.key == pygame.K_RETURN:
+            if event.key == pygame.K_RETURN and game_over == True:
                #RESTART GAME
                for i in range(num_of_enemies):
                    enemyX[i] = random.randint(0,800-enemyWidth[i])
                    enemyY[i] = random.randint(50,150)
 
                score_value = 0
+               game_over = False
                
             if event.key == pygame.K_LEFT:
                 playerX_change = -4
@@ -140,7 +187,7 @@ while brunning:
     for i in range(num_of_enemies):
 
         #GAME OVER
-        if enemyY[i] >= 460:
+        if enemyY[i] >= (480 - enemyHeight[i]):
             for j in range(num_of_enemies):
                 enemyY[j] = 2000
             game_over_text()
